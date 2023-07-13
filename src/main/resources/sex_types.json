@@ -1,0 +1,87 @@
+[
+  {
+    "name": "Cis-gender Woman",
+    "translation": "顺性别女",
+    "description": "自我性别感知和顺性别一致的女性，顺性别指出生时被指定的性别，可以被视为生理性别"
+  },
+  {
+    "name": "Transgender Woman",
+    "translation": "跨性别女",
+    "description": "出生时生理性别为男，后通过激素手段或手术转化得更具有女性生理特征"
+  },
+  {
+    "name": "Trans Feminine",
+    "translation": "跨女性化",
+    "description": "出生时生理性别为男，但性格或行为上的自我感觉更像女，可同时又不认为自己是女性"
+  },
+  {
+    "name": "Cis-gender Man",
+    "translation": "顺性别男",
+    "description": "自我性别感知和顺性别一致的男性，顺性别指出生时被指定的性别，可以被视为生理性别"
+  },
+  {
+    "name": "Transgender Man",
+    "translation": "跨性别男",
+    "description": "出生时生理性别为女，后通过激素手段或手术转化得更具有男性生理特征"
+  },
+  {
+    "name": "Trans Masculine",
+    "translation": "跨男性化",
+    "description": "出生时生理性别为女，但性格或行为上的自我感觉更像男，可同时又不认为自己是男性"
+  },
+  {
+    "name": "Agender",
+    "translation": "无性别",
+    "description": "没有发育性别、或者没有感觉到自己有任何强烈性别归属的人"
+  },
+  {
+    "name": "Gender Fluid",
+    "translation": "流性人",
+    "description": "谷爱凌国籍一般的性别"
+  },
+  {
+    "name": "Gender Nonconforming",
+    "translation": "非常规性别",
+    "description": "拒绝接受传统性别二元区分的人"
+  },
+  {
+    "name": "Pangender",
+    "translation": "泛性别",
+    "description": "认为自己是各种性别特质的混合体"
+  },
+  {
+    "name": "Cat",
+    "translation": "猫",
+    "description": "喵~"
+  },
+  {
+    "name": "Dog",
+    "translation": "狗",
+    "description": "汪!"
+  },
+  {
+    "name": "Paramecium",
+    "translation": "草履虫",
+    "description": "*蠕动 *蠕动 *蠕动"
+  },
+  {
+    "name": "Walmart Shopping Bag",
+    "translation": "沃尔玛购物袋",
+    "description": "只是一个普通的袋子"
+  },
+  {
+    "name": "Spaghetti",
+    "translation": "意大利面",
+    "description": "哧溜~"
+  },
+  {
+    "name": "Helicopter",
+    "translation": "直升机",
+    "description": "Google 中可将性别设为武装直升机"
+  },
+  {
+    "name": "Passion Fruit Double Boom Firecracker",
+    "translation": "鲜百香双响炮",
+    "description": "Coco原创明星爆品！满杯清新百香果清香难挡，Q弹珍珠与脆甜椰果奇妙口感交织，酸酸甜甜，清爽巨解腻。"
+  }
+]
