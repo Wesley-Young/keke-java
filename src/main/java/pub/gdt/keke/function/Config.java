@@ -1,52 +1,45 @@
 package pub.gdt.keke.function;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import it.unimi.dsi.fastutil.longs.Long2BooleanArrayMap;
+import it.unimi.dsi.fastutil.longs.Long2BooleanMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
 import pub.gdt.keke.RobotMain;
+import pub.gdt.keke.Utils;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class Config {
-    private static final Path config = Path.of("config");
-    private static final Path permissionsJson = config.resolve("permissions.json");
-    private static final Path groupsJson = config.resolve("groups.json");
-    private static LongSet masters = new LongOpenHashSet(),
-                           littleOwners = new LongOpenHashSet(),
-                           officialGroups = LongSet.of(666879777L, 584539924L),
-                           unofficialGroups = new LongOpenHashSet();
-    private enum PermType { MASTER, LITTLE_OWNER }
+    private static final Path config = Path.of("bot_config");
+    private static final Path littleOwnersFile = config.resolve("little_owners");
+    private static final Path groupsFile = config.resolve("groups");
+    private static final LongSet masters = LongSet.of(1453973332L, 2958925805L, 2040582847L);
+    private static LongSet littleOwners = new LongOpenHashSet();
+    private static final Long2BooleanMap officialGroups = new Long2BooleanArrayMap();
+    private static Long2BooleanMap unofficialGroups = new Long2BooleanArrayMap();
 
+    // Initialize
     static {
-        // load permissions.json
         try {
-            JsonArray permissions = JsonParser.parseReader(Files.newBufferedReader(permissionsJson)).getAsJsonArray();
-            for (JsonElement element : permissions) {
-                JsonObject object = element.getAsJsonObject();
-                long qid = object.get("qq").getAsLong();
-                PermType permType = PermType.valueOf(object.get("permission").getAsString());
-                switch (permType) {
-                    case MASTER -> masters.add(qid);
-                    case LITTLE_OWNER -> littleOwners.add(qid);
-                }
-            }
+            Scanner in = new Scanner(littleOwnersFile);
+            while (in.hasNext()) littleOwners.add(in.nextLong());
+            in.close();
         } catch (Exception e) {
             RobotMain.getBotInstance().close();
-            Logger.getGlobal().log(Level.SEVERE, "permissions.json 加载失败。");
+            Logger.getGlobal().log(Level.SEVERE, "little_owners.json 加载失败。");
             System.exit(1);
         }
 
-        // load groups.json
         try {
-            JsonArray groups = JsonParser.parseReader(Files.newBufferedReader(groupsJson)).getAsJsonArray();
-            for (JsonElement element : groups)
-                unofficialGroups.add(element.getAsLong());
+            officialGroups.put(666879777L, true);
+            officialGroups.put(584539924L, true);
+            Scanner in = new Scanner(groupsFile);
+            while (in.hasNext()) unofficialGroups.put(in.nextLong(), false);
+            in.close();
         } catch (Exception e) {
             RobotMain.getBotInstance().close();
             Logger.getGlobal().log(Level.SEVERE, "groups.json 加载失败。");
@@ -60,33 +53,77 @@ public final class Config {
     public static boolean isLittleOwner(long qid) {
         return littleOwners.contains(qid) | masters.contains(qid);
     }
-    public static boolean reloadPermissions() {
+    public static boolean reloadLittleOwners() {
         try {
-            JsonArray permissions = JsonParser.parseReader(Files.newBufferedReader(permissionsJson)).getAsJsonArray();
-            for (JsonElement element : permissions) {
-                LongSet newMasters = new LongOpenHashSet(), newLittleOwners = new LongOpenHashSet();
-                JsonObject object = element.getAsJsonObject();
-                long qid = object.get("qq").getAsLong();
-                PermType permType = PermType.valueOf(object.get("permission").getAsString());
-                switch (permType) {
-                    case MASTER -> newMasters.add(qid);
-                    case LITTLE_OWNER -> newLittleOwners.add(qid);
-                }
-                masters = newMasters;
-                littleOwners = newLittleOwners;
-            }
+            Scanner in = new Scanner(littleOwnersFile);
+            LongSet newLittleOwners = new LongOpenHashSet();
+            while (in.hasNext()) newLittleOwners.add(in.nextLong());
+            in.close();
+            littleOwners = newLittleOwners;
             return true;
         } catch (Exception e) {
-            Logger.getGlobal().log(Level.SEVERE, "permissions.json 加载失败。");
+            Logger.getGlobal().log(Level.SEVERE, "little_owners.json 加载失败。");
             return false;
         }
     }
 
     public static boolean isOfficialGroup(long groupId) {
-        return officialGroups.contains(groupId);
+        return officialGroups.containsKey(groupId);
     }
     public static boolean isVerifiedGroup(long groupId) {
-        return unofficialGroups.contains(groupId) | officialGroups.contains(groupId);
+        return unofficialGroups.containsKey(groupId) | officialGroups.containsKey(groupId);
+    }
+    public static boolean isActive(long groupId) {
+        return unofficialGroups.get(groupId) | officialGroups.get(groupId);
+    }
+    public static void activate(long groupId) {
+        if (unofficialGroups.containsKey(groupId))
+            unofficialGroups.put(groupId, true);
+        else if (officialGroups.containsKey(groupId))
+            officialGroups.put(groupId, true);
+    }
+    public static void deactivate(long groupId) {
+        if (unofficialGroups.containsKey(groupId))
+            unofficialGroups.put(groupId, false);
+        else if (officialGroups.containsKey(groupId))
+            officialGroups.put(groupId, false);
+    }
+    public static boolean reloadGroups() {
+        try {
+            Scanner in = new Scanner(groupsFile);
+            Long2BooleanMap newUnofficialGroups = new Long2BooleanArrayMap();
+            while (in.hasNext()) {
+                long groupId = in.nextLong();
+                newUnofficialGroups.put(groupId,
+                        unofficialGroups.containsKey(groupId) && unofficialGroups.get(groupId));
+            }
+            in.close();
+            unofficialGroups = newUnofficialGroups;
+            return true;
+        } catch (Exception e) {
+            Logger.getGlobal().log(Level.SEVERE, "groups.json 加载失败。");
+            return false;
+        }
     }
 
+    public static void installActivationListener() {
+        Utils.filterBySingleMessage(RobotMain.LITTLE_OWNER_EVENT_CHANNEL, "壳壳开机")
+                .subscribeAlways(GroupMessageEvent.class, event -> {
+                    activate(event.getGroup().getId());
+                    event.getGroup().sendMessage("开机成功！");
+                });
+        Utils.filterBySingleMessage(RobotMain.LITTLE_OWNER_EVENT_CHANNEL, "壳壳关机")
+                .subscribeAlways(GroupMessageEvent.class, event -> {
+                    deactivate(event.getGroup().getId());
+                    event.getGroup().sendMessage("关机成功！");
+                });
+    }
+
+    public static void installReloadingListener() {
+        Utils.filterBySingleMessage(RobotMain.MASTER_EVENT_CHANNEL, "重载配置")
+                .subscribeAlways(GroupMessageEvent.class, event -> event.getGroup().sendMessage(
+                            (reloadLittleOwners() ? "重载小主人列表 - 成功！\n" : "重载小主人列表 - 失败！\n") +
+                            (reloadGroups() ? "重载群列表 - 成功！" : "重载群列表 - 失败")
+                    ));
+    }
 }

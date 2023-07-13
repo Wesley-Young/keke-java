@@ -3,11 +3,12 @@ package pub.gdt.keke;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.auth.BotAuthorization;
-import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.event.EventChannel;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.events.BotOnlineEvent;
-import net.mamoe.mirai.event.events.MessageSyncEvent;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.utils.BotConfiguration;
+import pub.gdt.keke.function.Config;
 import pub.gdt.keke.function.WifeFinding;
 import xyz.cssxsh.mirai.tool.FixProtocolVersion;
 
@@ -17,6 +18,16 @@ import java.nio.file.Path;
 
 public class RobotMain {
     private static Bot bot;
+    public static final EventChannel<GroupMessageEvent> ALL_GROUP_EVENT_CHANNEL
+            = GlobalEventChannel.INSTANCE.filterIsInstance(GroupMessageEvent.class)
+                    .filter(event -> Config.isVerifiedGroup(event.getGroup().getId()));
+    public static final EventChannel<GroupMessageEvent> ACTIVE_GROUP_EVENT_CHANNEL
+            = ALL_GROUP_EVENT_CHANNEL.filter(event -> Config.isActive(event.getGroup().getId()));
+    public static final EventChannel<GroupMessageEvent> LITTLE_OWNER_EVENT_CHANNEL
+            = ACTIVE_GROUP_EVENT_CHANNEL.filter(event -> Config.isLittleOwner(event.getSender().getId()));
+    public static final EventChannel<GroupMessageEvent> MASTER_EVENT_CHANNEL
+            = ACTIVE_GROUP_EVENT_CHANNEL.filter(event -> Config.isMaster(event.getSender().getId()));
+
     public static Bot getBotInstance() { return bot; }
 
     public static void main(String[] args) throws IOException {
@@ -42,18 +53,12 @@ public class RobotMain {
 
         // Install event listeners
         GlobalEventChannel.INSTANCE.subscribeAlways(BotOnlineEvent.class, event -> {
-            installClosingListener();
-            for (Group each : bot.getGroups()) {
-                WifeFinding.installDailyWifeListener(each);
-            }
+            Config.installActivationListener();
+            Config.installReloadingListener();
+            WifeFinding.installWifeCacheRefreshListener();
+            WifeFinding.installDailyWifeListener();
         });
 
         bot.login();
-    }
-
-    private static void installClosingListener() {
-        GlobalEventChannel.INSTANCE.subscribeOnce(MessageSyncEvent.class, event -> {
-            bot.close();
-        });
     }
 }

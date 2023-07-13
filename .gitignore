@@ -40,3 +40,9 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### repository-only ###
+/cache/
+/cache/*
+/bot_config/*
+/bot_config/
