@@ -37,13 +37,13 @@ public class RobotMain {
         FixProtocolVersion.update();
         Path deviceInfoJson = Path.of("device.json");
         if (Files.notExists(deviceInfoJson)) {
-            bot.getLogger().info("Device info not found. Initializing...");
+            System.out.println("Device info not found. Initializing...");
             bot = BotFactory.INSTANCE.newBot(qq, BotAuthorization.byQRCode(), configuration -> {
                 configuration.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_WATCH);
                 configuration.fileBasedDeviceInfo();
             });
         } else {
-            bot.getLogger().info("device.json found. Loading...");
+            System.out.println("device.json found. Loading...");
             String deviceInfo = Files.readString(deviceInfoJson);
             bot = BotFactory.INSTANCE.newBot(qq, BotAuthorization.byQRCode(), configuration -> {
                 configuration.setProtocol(BotConfiguration.MiraiProtocol.ANDROID_WATCH);

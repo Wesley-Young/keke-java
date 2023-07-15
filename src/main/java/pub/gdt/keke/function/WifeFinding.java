@@ -7,9 +7,12 @@ import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.ListeningStatus;
-import net.mamoe.mirai.event.events.*;
+import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.MemberJoinEvent;
+import net.mamoe.mirai.event.events.MemberLeaveEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Image;
+import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.utils.ExternalResource;
 import pub.gdt.keke.RobotMain;
@@ -32,16 +35,18 @@ public final class WifeFinding {
         Map<NormalMember, NormalMember> map;
         if (today == cachedEpochDay) {
             if (caches.containsKey(groupId)) map = caches.get(groupId); // load cache
-            else map = rebuildCacheAndPut(group);
+            else map = rebuildCacheAndReturn(group);
         } else {
             cachedEpochDay = today;
             caches = new LongObjectHashMap<>();
-            map = rebuildCacheAndPut(group);
+            map = rebuildCacheAndReturn(group);
         }
         return map.get(group.get(applicant));
     }
-    private static synchronized Map<NormalMember, NormalMember> rebuildCacheAndPut(Group source) {
-        return caches.put(source.getId(), generateMap(source, cachedEpochDay * source.getId()));
+    private static synchronized Map<NormalMember, NormalMember> rebuildCacheAndReturn(Group source) {
+        Map<NormalMember, NormalMember> res = generateMap(source, cachedEpochDay * source.getId());
+        caches.put(source.getId(), res);
+        return res;
     }
     private static Map<NormalMember, NormalMember> generateMap(Group source, long seed) {
         List<NormalMember> members = new ArrayList<>(source.getMembers());
@@ -66,18 +71,19 @@ public final class WifeFinding {
     public static void installWifeCacheRefreshListener() {
         GlobalEventChannel.INSTANCE.filterIsInstance(MemberJoinEvent.class)
                 .subscribe(MemberJoinEvent.class, event -> {
-                    rebuildCacheAndPut(event.getGroup());
+                    rebuildCacheAndReturn(event.getGroup());
                     return ListeningStatus.LISTENING;
                 });
         GlobalEventChannel.INSTANCE.filterIsInstance(MemberLeaveEvent.class)
                 .subscribe(MemberLeaveEvent.class, event -> {
-                    rebuildCacheAndPut(event.getGroup());
+                    rebuildCacheAndReturn(event.getGroup());
                     return ListeningStatus.LISTENING;
                 });
     }
     public static void installDailyWifeListener() {
         Utils.filterBySingleMessage(RobotMain.ACTIVE_GROUP_EVENT_CHANNEL, "今日老婆")
                 .subscribe(GroupMessageEvent.class, event -> {
+                    MessageChain message = event.getMessage();
                     Group group = event.getGroup();
                     long applicantQid = event.getSender().getId();
                     try {
@@ -93,8 +99,8 @@ public final class WifeFinding {
                         builder.add(memberName + "(" + wife.getId() + ")");
                         imageResource.close();
                         group.sendMessage(builder.build());
-                    } catch (Exception ignored) {
-                        group.sendMessage("今日老婆加载失败！");
+                    } catch (Exception e) {
+                        group.sendMessage("今日老婆加载失败: " + e);
                     }
                     return ListeningStatus.LISTENING;
                 });
