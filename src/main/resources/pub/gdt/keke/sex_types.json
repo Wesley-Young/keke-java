@@ -1,5 +1,10 @@
 [
   {
+    "name": "Unknown",
+    "translation": "未指定",
+    "description": ""
+  },
+  {
     "name": "Cis-gender Woman",
     "translation": "顺性别女",
     "description": "自我性别感知和顺性别一致的女性，顺性别指出生时被指定的性别，可以被视为生理性别"

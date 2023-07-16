@@ -1,7 +1,5 @@
 package pub.gdt.keke.data;
 
-import kotlinx.serialization.json.JsonObject;
-
 public interface BotPlayer {
     /*
      * 微壳 体力 魅力 存款 炸弹 手雷 TNT
@@ -10,13 +8,11 @@ public interface BotPlayer {
      * 今日老婆/今时老婆/炸弹/打劫/签到/打搅/击剑/撅/扣/超/刷新时间(牛牛大作战共用一个)
      */
     long getQID();
-    long getGroupID();
-    boolean isMaster();
-    boolean isLittleMaster();
+    long getGroupId();
 
     // Basic Information
     void setSex(int id);
-    int getSex(int id);
+    int getSex();
 
     void setMoney(int money);
     int getMoney();
@@ -30,15 +26,12 @@ public interface BotPlayer {
     void setBombCount(int bombCount);
     int getBombCount();
 
-    boolean hasStarAnger();
-    void setStarAnger(long qid);
-    long getStarAnger();
-    void removeStarAnger();
-
-    void tap();
-    int tapCount();
+    int tap();
+    int getTapCount();
     void resetTap();
 
     NewNew getNewNew();
     FishingBank getFishingBank();
+    void setFishingStatus(boolean status);
+    boolean isFishing();
 }

@@ -1,7 +1,7 @@
 package pub.gdt.keke.data;
 
 public interface NewNew {
-    void setLength(double length);
-    double getLength();
+    void setLength(int length);
+    int getLength();
     long getLastModificationTime();
 }
