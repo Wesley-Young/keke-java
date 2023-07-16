@@ -4,10 +4,8 @@ import it.unimi.dsi.fastutil.longs.Long2BooleanArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2BooleanMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.mamoe.mirai.event.EventChannel;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import pub.gdt.keke.RobotMain;
-import pub.gdt.keke.Utils;
 
 import java.nio.file.Path;
 import java.util.Scanner;
@@ -107,26 +105,20 @@ public final class Config {
         }
     }
 
-    public static void installActivationListener() {
-        EventChannel<GroupMessageEvent> allGroupLittleOwnerChannel
-                = RobotMain.ALL_GROUP_EVENT_CHANNEL.filter(event -> isLittleOwner(event.getSender().getId()));
-        Utils.filterBySingleMessage(allGroupLittleOwnerChannel, "壳壳开机")
-                .subscribeAlways(GroupMessageEvent.class, event -> {
-                    activate(event.getGroup().getId());
-                    event.getGroup().sendMessage("开机成功！");
-                });
-        Utils.filterBySingleMessage(allGroupLittleOwnerChannel, "壳壳关机")
-                .subscribeAlways(GroupMessageEvent.class, event -> {
-                    deactivate(event.getGroup().getId());
-                    event.getGroup().sendMessage("关机成功！");
-                });
+    public static void respondActivation(GroupMessageEvent event) {
+        activate(event.getGroup().getId());
+        event.getGroup().sendMessage("开机成功！");
     }
 
-    public static void installReloadingListener() {
-        Utils.filterBySingleMessage(RobotMain.MASTER_EVENT_CHANNEL, "重载配置")
-                .subscribeAlways(GroupMessageEvent.class, event -> event.getGroup().sendMessage(
-                            (reloadLittleOwners() ? "重载小主人列表 - 成功\n" : "重载小主人列表 - 失败\n") +
-                            (reloadGroups() ? "重载群列表 - 成功" : "重载群列表 - 失败")
-                    ));
+    public static void respondDeactivation(GroupMessageEvent event) {
+        deactivate(event.getGroup().getId());
+        event.getGroup().sendMessage("关机成功！");
+    }
+
+    public static void respondReload(GroupMessageEvent event) {
+        event.getGroup().sendMessage(
+                (reloadLittleOwners() ? "重载小主人列表 - 成功！\n" : "重载小主人列表 - 失败！\n") +
+                (reloadGroups() ? "重载群列表 - 成功！" : "重载群列表 - 失败")
+        );
     }
 }

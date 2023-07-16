@@ -6,23 +6,27 @@ import net.mamoe.mirai.contact.AvatarSpec;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.event.GlobalEventChannel;
-import net.mamoe.mirai.event.ListeningStatus;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.MemberJoinEvent;
 import net.mamoe.mirai.event.events.MemberLeaveEvent;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Image;
-import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.utils.ExternalResource;
-import pub.gdt.keke.RobotMain;
-import pub.gdt.keke.Utils;
 
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.*;
 
 public final class WifeFinding {
+    static {
+        GlobalEventChannel.INSTANCE.filterIsInstance(MemberJoinEvent.class)
+                .filter(event -> Config.isVerifiedGroup(event.getGroup().getId()))
+                .subscribeAlways(MemberJoinEvent.class, event -> buildDailyWifeCacheAndReturn(event.getGroup()));
+        GlobalEventChannel.INSTANCE.filterIsInstance(MemberLeaveEvent.class)
+                .filter(event -> Config.isVerifiedGroup(event.getGroup().getId()))
+                .subscribeAlways(MemberLeaveEvent.class, event -> buildDailyWifeCacheAndReturn(event.getGroup()));
+    }
     private static long cachedEpochDay;
     private static LongObjectMap<Map<NormalMember, NormalMember>> caches;
     static {
@@ -35,15 +39,15 @@ public final class WifeFinding {
         Map<NormalMember, NormalMember> map;
         if (today == cachedEpochDay) {
             if (caches.containsKey(groupId)) map = caches.get(groupId); // load cache
-            else map = rebuildCacheAndReturn(group);
+            else map = buildDailyWifeCacheAndReturn(group);
         } else {
             cachedEpochDay = today;
             caches = new LongObjectHashMap<>();
-            map = rebuildCacheAndReturn(group);
+            map = buildDailyWifeCacheAndReturn(group);
         }
         return map.get(group.get(applicant));
     }
-    private static synchronized Map<NormalMember, NormalMember> rebuildCacheAndReturn(Group source) {
+    private static synchronized Map<NormalMember, NormalMember> buildDailyWifeCacheAndReturn(Group source) {
         Map<NormalMember, NormalMember> res = generateMap(source, cachedEpochDay * source.getId());
         caches.put(source.getId(), res);
         return res;
@@ -68,41 +72,24 @@ public final class WifeFinding {
         return res;
     }
 
-    public static void installWifeCacheRefreshListener() {
-        GlobalEventChannel.INSTANCE.filterIsInstance(MemberJoinEvent.class)
-                .subscribe(MemberJoinEvent.class, event -> {
-                    rebuildCacheAndReturn(event.getGroup());
-                    return ListeningStatus.LISTENING;
-                });
-        GlobalEventChannel.INSTANCE.filterIsInstance(MemberLeaveEvent.class)
-                .subscribe(MemberLeaveEvent.class, event -> {
-                    rebuildCacheAndReturn(event.getGroup());
-                    return ListeningStatus.LISTENING;
-                });
-    }
-    public static void installDailyWifeListener() {
-        Utils.filterBySingleMessage(RobotMain.ACTIVE_GROUP_EVENT_CHANNEL, "今日老婆")
-                .subscribe(GroupMessageEvent.class, event -> {
-                    MessageChain message = event.getMessage();
-                    Group group = event.getGroup();
-                    long applicantQid = event.getSender().getId();
-                    try {
-                        MessageChainBuilder builder = new MessageChainBuilder();
-                        builder.add(new At(applicantQid));
-                        builder.add(" 你今天的群友老婆是: \n");
-                        NormalMember wife = getDailyWife(group, applicantQid);
-                        ExternalResource imageResource = ExternalResource.create(
-                                new URL(wife.getAvatarUrl(AvatarSpec.LARGEST)).openStream());
-                        Image avatar = group.uploadImage(imageResource);
-                        builder.add(avatar);
-                        String memberName = wife.getNameCard().isEmpty() ? wife.getNick() : wife.getNameCard();
-                        builder.add(memberName + "(" + wife.getId() + ")");
-                        imageResource.close();
-                        group.sendMessage(builder.build());
-                    } catch (Exception e) {
-                        group.sendMessage("今日老婆加载失败: " + e);
-                    }
-                    return ListeningStatus.LISTENING;
-                });
+    public static void respondDailyWife(GroupMessageEvent event) {
+        Group group = event.getGroup();
+        long applicantQid = event.getSender().getId();
+        try {
+            MessageChainBuilder builder = new MessageChainBuilder();
+            builder.add(new At(applicantQid));
+            builder.add(" 你今天的群友老婆是: \n");
+            NormalMember wife = getDailyWife(group, applicantQid);
+            ExternalResource imageResource = ExternalResource.create(
+                    new URL(wife.getAvatarUrl(AvatarSpec.LARGEST)).openStream());
+            Image avatar = group.uploadImage(imageResource);
+            builder.add(avatar);
+            String memberName = wife.getNameCard().isEmpty() ? wife.getNick() : wife.getNameCard();
+            builder.add(memberName + "(" + wife.getId() + ")");
+            imageResource.close();
+            group.sendMessage(builder.build());
+        } catch (Exception e) {
+            group.sendMessage("今日老婆加载失败: " + e);
+        }
     }
 }

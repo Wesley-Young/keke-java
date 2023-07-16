@@ -5,10 +5,10 @@ import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.auth.BotAuthorization;
 import net.mamoe.mirai.event.EventChannel;
 import net.mamoe.mirai.event.GlobalEventChannel;
-import net.mamoe.mirai.event.events.BotOnlineEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.utils.BotConfiguration;
 import pub.gdt.keke.function.Config;
+import pub.gdt.keke.function.Fishing;
 import pub.gdt.keke.function.WifeFinding;
 import xyz.cssxsh.mirai.tool.FixProtocolVersion;
 
@@ -27,6 +27,10 @@ public class RobotMain {
             = ACTIVE_GROUP_EVENT_CHANNEL.filter(event -> Config.isLittleOwner(event.getSender().getId()));
     public static final EventChannel<GroupMessageEvent> MASTER_EVENT_CHANNEL
             = ACTIVE_GROUP_EVENT_CHANNEL.filter(event -> Config.isMaster(event.getSender().getId()));
+    public static final EventChannel<GroupMessageEvent> LITTLE_OWNER_OPERATING_EVENT_CHANNEL
+            = ALL_GROUP_EVENT_CHANNEL.filter(event -> Config.isLittleOwner(event.getSender().getId()));
+    public static final EventChannel<GroupMessageEvent> MASTER_OPERATING_EVENT_CHANNEL
+            = ALL_GROUP_EVENT_CHANNEL.filter(event -> Config.isMaster(event.getSender().getId()));
 
     public static Bot getBotInstance() { return bot; }
 
@@ -52,12 +56,14 @@ public class RobotMain {
         }
 
         // Install event listeners
-        GlobalEventChannel.INSTANCE.subscribeAlways(BotOnlineEvent.class, event -> {
-            Config.installActivationListener();
-            Config.installReloadingListener();
-            WifeFinding.installWifeCacheRefreshListener();
-            WifeFinding.installDailyWifeListener();
-        });
+        Utils.mapping("今日老婆", WifeFinding::respondDailyWife, ACTIVE_GROUP_EVENT_CHANNEL);
+
+        Utils.mapping("查看鱼库", Fishing::respondStatusCheck, ACTIVE_GROUP_EVENT_CHANNEL);
+        Utils.mapping("钓鱼", Fishing::respondStartFishing, ACTIVE_GROUP_EVENT_CHANNEL);
+
+        Utils.mapping("壳壳开机", Config::respondActivation, LITTLE_OWNER_OPERATING_EVENT_CHANNEL);
+        Utils.mapping("壳壳关机", Config::respondDeactivation, LITTLE_OWNER_OPERATING_EVENT_CHANNEL);
+        Utils.mapping("重载配置", Config::respondReload, MASTER_OPERATING_EVENT_CHANNEL);
 
         bot.login();
     }
