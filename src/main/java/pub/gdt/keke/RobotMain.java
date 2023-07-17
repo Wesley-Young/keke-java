@@ -60,6 +60,9 @@ public class RobotMain {
 
         Utils.mapping("查看鱼库", Fishing::respondStatusCheck, ACTIVE_GROUP_EVENT_CHANNEL);
         Utils.mapping("钓鱼", Fishing::respondStartFishing, ACTIVE_GROUP_EVENT_CHANNEL);
+        Utils.mapping("渔具商店", Fishing::respondToolShop, ACTIVE_GROUP_EVENT_CHANNEL);
+        Utils.mapping(message -> message.startsWith("购买渔具 "), Fishing::respondBuyingTools, ACTIVE_GROUP_EVENT_CHANNEL);
+        Utils.mapping(message -> message.startsWith("卖鱼 "), Fishing::respondSellingFish, ACTIVE_GROUP_EVENT_CHANNEL);
 
         Utils.mapping("壳壳开机", Config::respondActivation, LITTLE_OWNER_OPERATING_EVENT_CHANNEL);
         Utils.mapping("壳壳关机", Config::respondDeactivation, LITTLE_OWNER_OPERATING_EVENT_CHANNEL);
