@@ -16,15 +16,24 @@ public interface BotPlayer {
 
     void setMoney(int money);
     int getMoney();
+    default void addMoney(int amount) { setMoney(getMoney() + amount); }
+    default void subtractMoney(int amount) { setMoney(getMoney() - amount); }
 
     void setStrength(int strength);
     int getStrength();
+    default void addStrength(int amount) { setStrength(getStrength() + amount); }
+    default void subtractStrength(int amount) { setStrength(getStrength() - amount); }
 
     void setCharm(int charm);
     int getCharm();
-
+    default void addCharm(int amount) { setCharm(getCharm() + amount); }
+    default void subtractCharm(int amount) { setCharm(getCharm() - amount); }
+    
     void setBombCount(int bombCount);
     int getBombCount();
+    default void addBomb(int amount) { setBombCount(getBombCount() + amount); }
+    default void subtractBomb(int amount) { setBombCount(getBombCount() - amount); }
+    default void fetchBomb() { subtractBomb(1); }
 
     int tap();
     int getTapCount();

@@ -51,7 +51,7 @@ public final class BotPlayerImpl implements BotPlayer {
         newnew = new NewNewImpl(this);
         fishingBank = new FishingBankImpl(this);
         try {
-            data.load(Files.newInputStream(dataPath));
+            data.loadFromXML(Files.newInputStream(dataPath));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -86,7 +86,7 @@ public final class BotPlayerImpl implements BotPlayer {
 
     @Override
     public int getMoney() {
-        return Integer.parseInt(data.getProperty("money", "0"));
+        return Integer.parseInt(data.getProperty("money", "100000000" /* debug */));
     }
 
     @Override
@@ -97,7 +97,7 @@ public final class BotPlayerImpl implements BotPlayer {
 
     @Override
     public int getStrength() {
-        return Integer.parseInt(data.getProperty("strength", "0"));
+        return Integer.parseInt(data.getProperty("strength", "10000000" /* debug */));
     }
 
     @Override
@@ -108,7 +108,7 @@ public final class BotPlayerImpl implements BotPlayer {
 
     @Override
     public int getCharm() {
-        return Integer.parseInt(data.getProperty("charm", "0"));
+        return Integer.parseInt(data.getProperty("charm", "10000000" /* debug */));
     }
 
     @Override
@@ -119,7 +119,7 @@ public final class BotPlayerImpl implements BotPlayer {
 
     @Override
     public int getBombCount() {
-        return Integer.parseInt(data.getProperty("bombCount", "0"));
+        return Integer.parseInt(data.getProperty("bombCount", "1000000" /* debug */));
     }
 
     @Override
@@ -163,7 +163,7 @@ public final class BotPlayerImpl implements BotPlayer {
 
     synchronized void saveToFile() {
         try {
-            data.store(Files.newOutputStream(dataPath), "Player data");
+            data.storeToXML(Files.newOutputStream(dataPath), "Player data");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

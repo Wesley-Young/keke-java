@@ -22,7 +22,7 @@ public class PlayerManager {
         }
     }
     public static BotPlayer getPlayer(long qid, long groupId) {
-        Path groupRoot = root.resolve(String.valueOf(qid));
+        Path groupRoot = root.resolve(String.valueOf(groupId));
         Path playerData = groupRoot.resolve(qid + ".properties");
         try {
             if (Files.notExists(groupRoot)) Files.createDirectory(groupRoot);
