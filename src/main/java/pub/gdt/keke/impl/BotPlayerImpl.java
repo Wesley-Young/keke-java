@@ -10,6 +10,7 @@ import pub.gdt.keke.data.NewNew;
 import pub.gdt.keke.data.SexType;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
@@ -47,11 +48,12 @@ public final class BotPlayerImpl implements BotPlayer {
     public BotPlayerImpl(long qid, long groupId, Path root) {
         this.qid = qid;
         this.groupId = groupId;
-        dataPath = root.resolve(String.valueOf(groupId)).resolve(qid + ".properties");
+        dataPath = root.resolve(String.valueOf(groupId)).resolve(qid + ".xml");
         newnew = new NewNewImpl(this);
         fishingBank = new FishingBankImpl(this);
         try {
-            data.loadFromXML(Files.newInputStream(dataPath));
+            InputStream dataStream = Files.newInputStream(dataPath);
+            if (dataStream.available() != 0) data.loadFromXML(dataStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

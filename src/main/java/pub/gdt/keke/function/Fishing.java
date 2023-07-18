@@ -24,7 +24,6 @@ public final class Fishing {
     public static final int BAIT_PRICE = 10000;
 
     private static final Random randomForStrength = new Random();
-    private static final Random randomForFishPrice = new Random();
     private static final ProbabilityModel<Consumer<GroupMessageEvent>> probabilityModel
             = new WeightedProbabilityModel.Builder<Consumer<GroupMessageEvent>>()
             .put(4, Fishing::resultNothing)
@@ -91,9 +90,7 @@ public final class Fishing {
         int strengthNeeded = randomForStrength.nextInt(20, 100);
         builder.add(new At(player.getQID()));
         builder.add(Utils.checkStrengthAndDo(player, strengthNeeded, aPlayer -> aPlayer.setFishingStatus(true)) ?
-                    " 你的体力不足以钓鱼！" :
-                    " 消耗 " + strengthNeeded + " 体力！\n" +
-                    "钓鱼中……请等待一段时间");
+                " 消耗 " + strengthNeeded + " 体力！\n钓鱼中……请等待一段时间" : " 你的体力不足以钓鱼！");
         event.getGroup().sendMessage(builder.build());
         int sleepingInterval = randomForStrength.nextInt(10000, 30001);
         new Thread(() -> {

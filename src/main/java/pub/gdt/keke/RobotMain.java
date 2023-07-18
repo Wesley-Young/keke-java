@@ -6,6 +6,7 @@ import net.mamoe.mirai.auth.BotAuthorization;
 import net.mamoe.mirai.event.EventChannel;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
+import net.mamoe.mirai.event.events.MessageSyncEvent;
 import net.mamoe.mirai.utils.BotConfiguration;
 import pub.gdt.keke.function.Config;
 import pub.gdt.keke.function.Fishing;
@@ -56,6 +57,12 @@ public class RobotMain {
         }
 
         // Install event listeners
+        GlobalEventChannel.INSTANCE.filterIsInstance(MessageSyncEvent.class)
+                        .subscribeAlways(MessageSyncEvent.class, event -> {
+                            if (event.getMessage().contentToString().contentEquals("sign out"))
+                                bot.close();
+                        });
+
         Utils.mapping("今日老婆", WifeFinding::respondDailyWife, ACTIVE_GROUP_EVENT_CHANNEL);
 
         Utils.mapping("查看鱼库", Fishing::respondStatusCheck, ACTIVE_GROUP_EVENT_CHANNEL);

@@ -19,7 +19,7 @@ dependencies {
     implementation("org.slf4j", "slf4j-simple", "2.0.7")
     implementation("com.google.code.gson", "gson", "2.10.1")
     implementation("it.unimi.dsi", "fastutil", "8.5.12")
-    implementation(files("..\\_local-libs\\fix-protocol-version-1.9.4.mirai2.jar"))
+    implementation(files("..\\_local-libs\\fix-protocol-version-1.9.6.mirai2.jar"))
 }
 
 application {
