@@ -54,6 +54,10 @@ public final class Utils {
         return checkAndBuy(player, price, ifSuccess) ? "购买成功！" : "你的微壳不足以购买！";
     }
 
+    public static String buyToolWithMessage(BotPlayer player, int price, Predicate<BotPlayer> hasTool, Consumer<BotPlayer> ifSuccess) {
+        return hasTool.test(player) ? "你已经拥有该工具了！" : buyWithMessage(player, price, ifSuccess);
+    }
+
     public static boolean checkStrengthAndDo(BotPlayer player, int amount, Consumer<BotPlayer> ifSuccess) {
         if (player.getStrength() < amount) return false;
         else {

@@ -19,6 +19,7 @@ import java.nio.file.Path;
 
 public class RobotMain {
     private static Bot bot;
+    public static final long QQ = 3446149635L;
     public static final EventChannel<GroupMessageEvent> ALL_GROUP_EVENT_CHANNEL
             = GlobalEventChannel.INSTANCE.filterIsInstance(GroupMessageEvent.class)
                     .filter(event -> Config.isVerifiedGroup(event.getGroup().getId()));
@@ -36,7 +37,7 @@ public class RobotMain {
     public static Bot getBotInstance() { return bot; }
 
     public static void main(String[] args) throws IOException {
-        long qq = 3446149635L;
+        long qq = QQ;
         if (args.length == 1) qq = Long.parseLong(args[0]);
 
         FixProtocolVersion.update();

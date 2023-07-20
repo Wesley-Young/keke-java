@@ -15,8 +15,6 @@ import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static pub.gdt.keke.data.FishType.*;
-
 public final class Fishing {
     public static final int ROD_PRICE = 150000;
     public static final int THREAD_PRICE = 100000;
@@ -32,19 +30,14 @@ public final class Fishing {
             .put(1, Fishing::resultBadLuck)
             .build();
 
-    private static final ProbabilityModel<FishType> fishTypeProbabilityModel
-            = new WeightedProbabilityModel.Builder<FishType>()
-            .put(10, UNDERWEAR)
-            .put(10, SHOES)
-            .put(10, FROG)
-            .put(10, SHELL)
-            .put(20, YELLOW_CROAKER)
-            .put(10, ELECTRIC_EEL)
-            .put(1, OCTOPUS) // 怎么能那么容易就让你们钓到章鱼
-            .put(10, WHALE)
-            .put(10, CROWN)
-            .put(10, DIAMOND_RING)
-            .build();
+    private static final ProbabilityModel<FishType> fishTypeProbabilityModel;
+
+    static {
+        WeightedProbabilityModel.Builder<FishType> builder = new WeightedProbabilityModel.Builder<>();
+        for (FishType type : FishType.values())
+            builder.put(type.getProbabilityWeight(), type);
+        fishTypeProbabilityModel = builder.build();
+    }
 
     public static void respondStatusCheck(GroupMessageEvent event) {
         MessageChainBuilder builder = new MessageChainBuilder();
@@ -127,7 +120,7 @@ public final class Fishing {
         BotPlayer player = PlayerManager.getPlayer(event.getSender().getId(), event.getGroup().getId());
         FishingBank fishingBank = player.getFishingBank();
         FishType fishType = fishTypeProbabilityModel.fetchResult();
-        fishingBank.setFishCount(fishType, fishingBank.getFishCount(fishType) + 1);
+        fishingBank.obtainFish(fishType);
         builder.add(new At(player.getQID()));
         builder.add(" 钓到" + fishType.getTranslation());
         event.getGroup().sendMessage(builder.build());
@@ -169,11 +162,14 @@ public final class Fishing {
                         发送【购买渔具 <所需渔具>】以购买渔具
                         发送【购买渔具 鱼饵 [鱼饵数量|默认1]】以购买鱼饵""");
         else switch (flags[1]) {
-            case "鱼竿" -> builder.add(" " + Utils.buyWithMessage(player, ROD_PRICE,
+            case "鱼竿" -> builder.add(" " + Utils.buyToolWithMessage(player, ROD_PRICE,
+                    aPlayer -> aPlayer.getFishingBank().hasRod(),
                     aPlayer -> aPlayer.getFishingBank().buyRod()));
-            case "鱼线" -> builder.add(" " + Utils.buyWithMessage(player, THREAD_PRICE,
+            case "鱼线" -> builder.add(" " + Utils.buyToolWithMessage(player, THREAD_PRICE,
+                    aPlayer -> aPlayer.getFishingBank().hasThread(),
                     aPlayer -> aPlayer.getFishingBank().buyThread()));
-            case "鱼钩" -> builder.add(" " + Utils.buyWithMessage(player, HOOK_PRICE,
+            case "鱼钩" -> builder.add(" " + Utils.buyToolWithMessage(player, HOOK_PRICE,
+                    aPlayer -> aPlayer.getFishingBank().hasHook(),
                     aPlayer -> aPlayer.getFishingBank().buyHook()));
             case "鱼饵" -> {
                 try {
@@ -195,14 +191,16 @@ public final class Fishing {
     public static void respondSellingFish(GroupMessageEvent event) {
         MessageChainBuilder builder = new MessageChainBuilder();
         BotPlayer player = PlayerManager.getPlayer(event.getSender().getId(), event.getGroup().getId());
-        FishingBank fishingBank = player.getFishingBank();
         builder.add(new At(player.getQID()));
         String[] flags = event.getMessage().contentToString().split(" ", 2);
         if (flags.length <= 1)
             builder.add(" 发送【卖鱼 <卖鱼种类>】以卖掉1条所钓的鱼");
         Stream.of(FishType.values()).filter(type -> type.getTranslation().contentEquals(flags[1])).findAny()
                 .ifPresentOrElse(
-                        type -> builder.add(" " + type.performActionOn(player)),
+                        type -> {
+                            player.getFishingBank().fetchFish(type);
+                            builder.add(" " + type.performActionOn(player));
+                        },
                         () -> builder.add(" 发送【卖鱼 <卖鱼种类>】以卖掉1条所钓的鱼")
                 );
         event.getGroup().sendMessage(builder.build());

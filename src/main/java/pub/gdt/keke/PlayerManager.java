@@ -11,7 +11,7 @@ import java.nio.file.Path;
 
 public class PlayerManager {
     private static final Long2ObjectMap<Long2ObjectMap<BotPlayer>> groupMap = new Long2ObjectOpenHashMap<>();
-    private static Path root = Path.of("data", "profile");
+    private static final Path root = Path.of("data", "profile");
     static {
         if (Files.notExists(root)) {
             try {
@@ -23,7 +23,7 @@ public class PlayerManager {
     }
     public static BotPlayer getPlayer(long qid, long groupId) {
         Path groupRoot = root.resolve(String.valueOf(groupId));
-        Path playerData = groupRoot.resolve(qid + ".xml");
+        Path playerData = groupRoot.resolve(qid + ".properties");
         try {
             if (Files.notExists(groupRoot)) Files.createDirectory(groupRoot);
             if (Files.notExists(playerData)) Files.createFile(playerData);

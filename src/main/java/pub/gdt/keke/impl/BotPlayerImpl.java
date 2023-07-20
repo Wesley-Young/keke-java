@@ -21,7 +21,7 @@ import java.util.Properties;
 
 public final class BotPlayerImpl implements BotPlayer {
     private static final URL sexTypesJson = BotPlayerImpl.class.getClassLoader().getResource("pub/gdt/keke/sex_types.json");
-    private static ArrayList<SexType> sexTypes = new ArrayList<>();
+    private static final ArrayList<SexType> sexTypes = new ArrayList<>();
 
     static {
         try {
@@ -48,12 +48,12 @@ public final class BotPlayerImpl implements BotPlayer {
     public BotPlayerImpl(long qid, long groupId, Path root) {
         this.qid = qid;
         this.groupId = groupId;
-        dataPath = root.resolve(String.valueOf(groupId)).resolve(qid + ".xml");
+        dataPath = root.resolve(String.valueOf(groupId)).resolve(qid + ".properties");
         newnew = new NewNewImpl(this);
         fishingBank = new FishingBankImpl(this);
         try {
             InputStream dataStream = Files.newInputStream(dataPath);
-            if (dataStream.available() != 0) data.loadFromXML(dataStream);
+            data.load(dataStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -165,7 +165,7 @@ public final class BotPlayerImpl implements BotPlayer {
 
     synchronized void saveToFile() {
         try {
-            data.storeToXML(Files.newOutputStream(dataPath), "Player data");
+            data.store(Files.newOutputStream(dataPath), "Player data");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
