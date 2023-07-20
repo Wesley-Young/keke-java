@@ -47,5 +47,5 @@ bin/
 /bot_config/*
 /bot_config/
 /data/
-/*.json
-
+/android_pad.json
+/device.json

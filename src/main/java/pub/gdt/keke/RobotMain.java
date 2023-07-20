@@ -59,7 +59,7 @@ public class RobotMain {
         // Install event listeners
         GlobalEventChannel.INSTANCE.filterIsInstance(MessageSyncEvent.class)
                         .subscribeAlways(MessageSyncEvent.class, event -> {
-                            if (event.getMessage().contentToString().contentEquals("sign out"))
+                            if (event.getMessage().contentToString().contentEquals("关闭总开关"))
                                 bot.close();
                         });
 
